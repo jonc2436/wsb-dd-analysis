@@ -18,16 +18,28 @@ reddit = praw.Reddit(
     user_agent = USER_AGENT
 )
 
-subreddit = reddit.subreddit("wallstreetbets")
+def fetch_dd_posts(count:int = 100):
+    subreddit = reddit.subreddit("wallstreetbets")
+    posts = []
 
-dd_posts = []
+    for post in subreddit.new(limit=count):
+        if post.link_flair_text == "DD":
+            post_data = {
+                'id': post.id,
+                'author': post.author,
+                'created_time (utc)': post.created_utc,
+                'post_title': post.title,
+                'text': post.selftext,
+                'upvote_count': post.score,
+                'upvote_ratio': post.upvote_ratio
+            }
 
-for post in subreddit.new(limit=1000):
-    if post.link_flair_text == "DD":
-        dd_posts.append({
-            "id": post.id,
-            "title": post.title,
-            "score": post.score,
-            "num_comments": post.num_comments,
-            "created_utc": post.created_utc
-        })
+            posts.append(post_data)
+    
+    return posts
+
+def main():
+    posts = fetch_dd_posts()
+
+if __name__ == "__main__":
+    main()
